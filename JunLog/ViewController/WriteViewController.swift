@@ -7,12 +7,19 @@
 
 import UIKit
 import SnapKit
+import RealmSwift
 
 final class WriteViewController: UIViewController {
     private let writeView = WriteView()
     
     private let titleTextField: UITextField
     private let contentTextView: UITextView
+    
+    private lazy var uploadButton: UIBarButtonItem = {
+        let button = UIBarButtonItem(title: "등록", style: .plain, target: self, action: #selector(uploadButtonTapped(_:)))
+        
+        return button
+    }()
     
     init() {
         self.titleTextField = writeView.titleTextField
@@ -36,6 +43,7 @@ extension WriteViewController {
     private func attribute() {
         view.addSubview(writeView)
         view.backgroundColor = .systemBackground
+        navigationItem.rightBarButtonItem = uploadButton
         
         titleTextField.delegate = self
         contentTextView.delegate = self
@@ -45,6 +53,10 @@ extension WriteViewController {
         writeView.snp.makeConstraints {
             $0.top.leading.trailing.bottom.equalToSuperview()
         }
+    }
+    
+    @objc private func uploadButtonTapped(_ sender: UIBarButtonItem) {
+        
     }
 }
 
