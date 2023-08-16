@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 final class MainTableViewCell: UITableViewCell {
-    private let titleLabel: UILabel = {
+    let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "테스트 제목"
         label.font = .systemFont(ofSize: 18, weight: .bold)
@@ -22,7 +22,7 @@ final class MainTableViewCell: UITableViewCell {
         return label
     }()
     
-    private let dateLabel: UILabel = {
+    let dateLabel: UILabel = {
         let label = UILabel()
         label.text = "테스트 날짜"
         label.font = .systemFont(ofSize: 14, weight: .light)
