@@ -1,47 +1,48 @@
 //
-//  WriteView.swift
+//  DetailView.swift
 //  JunLog
 //
-//  Created by 한소희 on 2023/08/08.
+//  Created by 한소희 on 2023/08/11.
 //
 
 import UIKit
 import SnapKit
 
-final class WriteView: UIView {
+final class DetailView: UIView {
+    
     let titleTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "제목을 입력해 주세요."
         textField.font = .systemFont(ofSize: 20, weight: .bold)
         textField.textColor = .label
+        textField.isEnabled = false
         textField.textAlignment = .left
         textField.layer.borderColor = UIColor.label.cgColor
         textField.layer.borderWidth = 0.5
         textField.layer.cornerRadius = 10
-        
         return textField
     }()
     
-    private let datePicker: UIDatePicker = {
+    let datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .automatic
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ko-KR")
+        datePicker.isEnabled = false
         
         return datePicker
     }()
     
     let contentTextView: UITextView = {
         let textView = UITextView()
+        textView.isEditable = false
         textView.font = .systemFont(ofSize: 20)
         textView.textAlignment = .left
         textView.textColor = .label
-        textView.isEditable = true
         textView.backgroundColor = .systemBackground
         textView.layer.borderColor = UIColor.label.cgColor
         textView.layer.borderWidth = 0.5
         textView.layer.cornerRadius = 10
-        
+
         
         return textView
     }()
@@ -56,7 +57,7 @@ final class WriteView: UIView {
     }
 }
 
-extension WriteView {
+extension DetailView {
     private func layout() {
         [
             titleTextField,
@@ -84,5 +85,4 @@ extension WriteView {
             $0.leading.equalTo(self.safeAreaLayoutGuide).offset(8)
             $0.trailing.bottom.equalTo(self.safeAreaLayoutGuide).offset(-8)
         }
-    }
-}
+    }}
