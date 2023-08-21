@@ -106,16 +106,31 @@ extension DetailViewController: UITextViewDelegate {
         let titleMaxLength = 15
         let contentMaxLength = 300
         
-        guard let titleText = detailView.titleTextView.text else { return }
-        guard let contentText = detailView.contentTextView.text else { return }
-        
-        if contentText.count > contentMaxLength {
-            textView.text = String(contentText.prefix(contentMaxLength))
+        switch textView {
+        case detailView.titleTextView:
+            if textView.text.count > titleMaxLength {
+                textView.text = String(textView.text.prefix(titleMaxLength))
+            }
+            
+        case detailView.contentTextView:
+            if textView.text.count > contentMaxLength {
+                textView.text = String(textView.text.prefix(contentMaxLength))
+            }
+            
+        default:
+            print("error")
         }
         
-        if titleText.count > titleMaxLength {
-            textView.text = String(titleText.prefix(titleMaxLength))
-        }
+//        guard let titleText = detailView.titleTextView.text else { return }
+//        guard let contentText = detailView.contentTextView.text else { return }
+//
+//        if contentText.count > contentMaxLength {
+//            textView.text = String(contentText.prefix(contentMaxLength))
+//        }
+//
+//        if titleText.count > titleMaxLength {
+//            textView.text = String(titleText.prefix(titleMaxLength))
+//        }
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {

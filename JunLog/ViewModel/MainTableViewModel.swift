@@ -11,7 +11,7 @@ import RxSwift
 
 final class MainTableViewModel {
     private let realm = try! Realm()
-    var logWriteData: [LogWriteData] = []
+    private(set) var logWriteData: [LogWriteData] = []
     
     func getData() {
         let dataList = realm.objects(LogWriteData.self)
