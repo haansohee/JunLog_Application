@@ -13,14 +13,15 @@ final class DetailViewModel {
     private let realm = try! Realm()
     private let dateFormatter = DateFormatter()
     
-    func uploadLog(title: String, content: String, date: Date) {
-        if title.isEmpty {
+    func uploadLog(title: String, content: String, date: Date, titleLengthLimit: String, contentLengthLimit: String) {
+        
+        if title.isEmpty || title == titleLengthLimit{
             logWirteData.title = "제목없음"
         } else {
             logWirteData.title = title
         }
         
-        if content.isEmpty {
+        if content.isEmpty || content == contentLengthLimit {
             logWirteData.content = "내용없음"
         } else {
             logWirteData.content = content

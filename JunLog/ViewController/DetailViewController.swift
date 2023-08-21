@@ -21,6 +21,9 @@ final class DetailViewController: UIViewController {
     private var viewType: ViewType
     private let viewModel: DetailViewModel
     
+    private let titleLengthLimit = "제목을 입력하세요. (15자 이내)" 
+    private let contentLengthLimit = "내용을 입력하세요. (300자 이내)"
+    
     init(data: LogWriteData? = nil) {
         self.viewModel = DetailViewModel()
         viewType = data != nil ? .read : .write
@@ -68,11 +71,11 @@ extension DetailViewController {
             detailView.datePicker.isEnabled = true
             
             detailView.contentTextView.isEditable = true
-            detailView.contentTextView.text = "내용을 입력하세요. (300자 이내)"
+            detailView.contentTextView.text = contentLengthLimit
             detailView.contentTextView.textColor = .placeholderText
             
             detailView.titleTextView.isEditable = true
-            detailView.titleTextView.text = "제목을 입력하세요. (15자 이내)"
+            detailView.titleTextView.text = titleLengthLimit
             detailView.titleTextView.textColor = .placeholderText
         }
     }
@@ -92,9 +95,33 @@ extension DetailViewController {
             guard let title = detailView.titleTextView.text else { return }
             guard let content = detailView.contentTextView.text else { return }
             
-            viewModel.uploadLog(title: title, content: content, date: detailView.datePicker.date)
             
-            self.navigationController?.popViewController(animated: true)
+            let alert = UIAlertController(title: "쭌로그", message: "업로드 할까요?", preferredStyle: .alert)
+            
+            let confirmAlert = UIAlertAction(title: "업로드 하기", style: .default) { [weak self] _ in
+                guard let date = self?.detailView.datePicker.date,
+                      let titleLengthLimit = self?.titleLengthLimit,
+                      let contentLengthLimit = self?.contentLengthLimit else { return }
+                
+                print("제목:\(titleLengthLimit) ")
+                print("내용: \(contentLengthLimit)")
+                
+                self?.viewModel.uploadLog(
+                    title: title,
+                    content: content,
+                    date: date,
+                    titleLengthLimit: titleLengthLimit,
+                    contentLengthLimit: contentLengthLimit
+                )
+                self?.navigationController?.popViewController(animated: true)
+            }
+            
+            let cancelAlert = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            
+            alert.addAction(confirmAlert)
+            alert.addAction(cancelAlert)
+            
+            present(alert, animated: true, completion: nil)
         }
     }
 }
@@ -120,17 +147,6 @@ extension DetailViewController: UITextViewDelegate {
         default:
             print("error")
         }
-        
-//        guard let titleText = detailView.titleTextView.text else { return }
-//        guard let contentText = detailView.contentTextView.text else { return }
-//
-//        if contentText.count > contentMaxLength {
-//            textView.text = String(contentText.prefix(contentMaxLength))
-//        }
-//
-//        if titleText.count > titleMaxLength {
-//            textView.text = String(titleText.prefix(titleMaxLength))
-//        }
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
