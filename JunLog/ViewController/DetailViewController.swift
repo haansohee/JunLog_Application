@@ -103,9 +103,6 @@ extension DetailViewController {
                       let titleLengthLimit = self?.titleLengthLimit,
                       let contentLengthLimit = self?.contentLengthLimit else { return }
                 
-                print("제목:\(titleLengthLimit) ")
-                print("내용: \(contentLengthLimit)")
-                
                 self?.viewModel.uploadLog(
                     title: title,
                     content: content,
