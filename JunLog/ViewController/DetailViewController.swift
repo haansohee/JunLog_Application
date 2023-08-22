@@ -144,7 +144,6 @@ extension DetailViewController: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         guard textView.textColor == .placeholderText else { return }
         configurePlaceholder(with: textView, isEmpty: false)
-        
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -157,6 +156,24 @@ extension DetailViewController: UITextViewDelegate {
             configurePlaceholder(with: textView, isEmpty: true)
         } else if textView.textColor == .placeholderText {
             configurePlaceholder(with: textView, isEmpty: false)
+        }
+        
+        let titleMaxLength = 15
+        let contentMaxLength = 300
+        
+        switch textView {
+        case detailView.titleTextView:
+            if textView.text.count > titleMaxLength {
+                textView.text = String(textView.text.prefix(titleMaxLength))
+            }
+            
+        case detailView.contentTextView:
+            if textView.text.count > contentMaxLength {
+                textView.text = String(textView.text.prefix(contentMaxLength))
+            }
+            
+        default:
+            print("ERROR:")
         }
     }
 }
