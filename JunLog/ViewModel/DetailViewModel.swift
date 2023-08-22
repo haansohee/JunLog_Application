@@ -13,6 +13,18 @@ final class DetailViewModel {
     private let realm = try! Realm()
     private let dateFormatter = DateFormatter()
     
+    func convertStringToDate(date: String) -> Date {
+        dateFormatter.dateFormat = "yyyy/MM/dd"
+        guard let date = dateFormatter.date(from: date) else { return Date() }
+        
+        return date
+    }
+    
+    func converDateToString(date: Date) -> String {
+        dateFormatter.dateFormat = "yyyy/MM/dd"
+        return dateFormatter.string(from: date)
+    }
+    
     func uploadLog(with junLogContent: JunLogContent) {
         if junLogContent.title.isEmpty || (junLogContent.title == junLogContent.titlePlaceholder){
             logWirteData.title = "제목없음"
@@ -26,8 +38,7 @@ final class DetailViewModel {
             logWirteData.content = junLogContent.content
         }
         
-        dateFormatter.dateFormat = "yyyy/MM/dd"
-        let date = dateFormatter.string(from: junLogContent.writeDate)
+        let date = converDateToString(date: junLogContent.date)
         
         // make ID
         dateFormatter.dateFormat = "yyyyMMddHHmmss"
@@ -41,5 +52,8 @@ final class DetailViewModel {
         try! realm.write {
             realm.add(logWirteData)
         }
+    }
+    
+    func updateLog(with junLogContent: JunLogContent, id: Int) {
     }
 }

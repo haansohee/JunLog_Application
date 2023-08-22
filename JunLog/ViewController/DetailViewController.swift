@@ -15,15 +15,15 @@ final class DetailViewController: UIViewController {
         case read
     }
     
-    private var updateButton: UIBarButtonItem?
+    private var barButtonItem: UIBarButtonItem?
     
     private let detailView = DetailView()
     private var viewType: ViewType
     private let viewModel: DetailViewModel
-    private let logContent: JunLogContent
     
     private let titlePlaceholder = "제목을 입력하세요. (15자 이내)"
     private let contentPlaceholder = "내용을 입력하세요. (300자 이내)"
+    private var id = 0
     
     init(data: LogWriteData? = nil) {
         self.viewModel = DetailViewModel()
@@ -65,8 +65,13 @@ extension DetailViewController {
             guard let data = data else { return }
             detailView.titleTextView.text = data.title
             detailView.titleTextView.textColor = .label
+            
             detailView.contentTextView.text = data.content
             detailView.contentTextView.textColor = .label
+            
+            detailView.datePicker.date = viewModel.convertStringToDate(date: data.date)
+            
+            self.id = data.id
             
         case .write:
             detailView.datePicker.isEnabled = true
@@ -83,8 +88,8 @@ extension DetailViewController {
     
     private func configureBarButtonItem() {
         let title = self.viewType == .read ? "수정하기" : "등록하기"
-        self.updateButton = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector (updateButtonTapped(_:)))
-        navigationItem.rightBarButtonItem = updateButton
+        self.barButtonItem = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector (barButtonItemTapped(_:)))
+        navigationItem.rightBarButtonItem = barButtonItem
     }
     
     private func configurePlaceholder(with textView: UITextView, isEmpty: Bool) {
@@ -103,44 +108,69 @@ extension DetailViewController {
         textView.textColor = .placeholderText
     }
     
-    @objc private func updateButtonTapped(_ sender: UIBarButtonItem) {
+    @objc private func barButtonItemTapped(_ sender: UIBarButtonItem) {
         switch self.viewType {
         case .read:
-            print("read")
+            detailView.datePicker.isEnabled = true
+            detailView.titleTextView.isEditable = true
+            detailView.contentTextView.isEditable = true
+            
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "수정완료", style: .plain, target: self, action: #selector (accessLog))
             
         case .write:
-            guard let title = detailView.titleTextView.text else { return }
-            guard let content = detailView.contentTextView.text else { return }
+            accessLog()
+        }
+    }
+    
+    @objc private func accessLog() {
+        var alertMessage = "수정할까요?"
+        var alertTitle = "수정하기"
+        
+        if viewType == .write {
+            alertMessage = "업로드 할까요?"
+            alertTitle = "업로드"
+        }
+        
+        guard let title = detailView.titleTextView.text else { return }
+        guard let content = detailView.contentTextView.text else { return }
+
+        let alert = UIAlertController(title: "쭌로그", message: alertMessage, preferredStyle: .alert)
+        
+        let confirmAlert = UIAlertAction(title: alertTitle, style: .default) {[weak self] _ in
+            guard let date = self?.detailView.datePicker.date,
+                  let titlePlaceholder = self?.titlePlaceholder,
+                  let contentPlaceholder = self?.contentPlaceholder,
+                  let id = self?.id else { return }
+
+            let junLogContent = JunLogContent(
+                title: title,
+                content: content,
+                date: date,
+                titlePlaceholder: titlePlaceholder,
+                contentPlaceholder: contentPlaceholder
+            )
             
-            
-            let alert = UIAlertController(title: "쭌로그", message: "업로드 할까요?", preferredStyle: .alert)
-            
-            let confirmAlert = UIAlertAction(title: "업로드 하기", style: .default) { [weak self] _ in
-                guard let date = self?.detailView.datePicker.date,
-                      let titlePlaceholder = self?.titlePlaceholder,
-                      let contentPlaceholder = self?.contentPlaceholder else { return }
+            switch self?.viewType {
+            case .read:
+                self?.viewModel.updateLog(with: junLogContent, id: id)
                 
-                let junLogContent = JunLogContent(
-                    title: title,
-                    content: content,
-                    writeDate: date,
-                    updatedDate: Date(),
-                    titlePlaceholder: titlePlaceholder,
-                    contentPlaceholder: contentPlaceholder
-                )
-                
+            case .write:
                 self?.viewModel.uploadLog(with: junLogContent)
                 
-                self?.navigationController?.popViewController(animated: true)
+            case .none:
+                print("ERROR")
             }
-            
-            let cancelAlert = UIAlertAction(title: "취소", style: .cancel, handler: nil)
-            
-            alert.addAction(confirmAlert)
-            alert.addAction(cancelAlert)
-            
-            present(alert, animated: true, completion: nil)
+
+            self?.navigationController?.popViewController(animated: true)
         }
+
+        let cancelAlert = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+
+        alert.addAction(confirmAlert)
+        alert.addAction(cancelAlert)
+
+        present(alert, animated: true, completion: nil)
+
     }
 }
 
