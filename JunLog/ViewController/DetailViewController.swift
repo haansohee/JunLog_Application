@@ -20,6 +20,7 @@ final class DetailViewController: UIViewController {
     private let detailView = DetailView()
     private var viewType: ViewType
     private let viewModel: DetailViewModel
+    private let logContent: JunLogContent
     
     private let titlePlaceholder = "제목을 입력하세요. (15자 이내)"
     private let contentPlaceholder = "내용을 입력하세요. (300자 이내)"
@@ -119,13 +120,17 @@ extension DetailViewController {
                       let titlePlaceholder = self?.titlePlaceholder,
                       let contentPlaceholder = self?.contentPlaceholder else { return }
                 
-                self?.viewModel.uploadLog(
+                let junLogContent = JunLogContent(
                     title: title,
                     content: content,
-                    date: date,
+                    writeDate: date,
+                    updatedDate: Date(),
                     titlePlaceholder: titlePlaceholder,
                     contentPlaceholder: contentPlaceholder
                 )
+                
+                self?.viewModel.uploadLog(with: junLogContent)
+                
                 self?.navigationController?.popViewController(animated: true)
             }
             
