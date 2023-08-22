@@ -10,16 +10,17 @@ import SnapKit
 
 final class DetailView: UIView {
     
-    let titleTextField: UITextField = {
-        let textField = UITextField()
-        textField.font = .systemFont(ofSize: 20, weight: .bold)
-        textField.textColor = .label
-        textField.isEnabled = false
-        textField.textAlignment = .left
-        textField.layer.borderColor = UIColor.label.cgColor
-        textField.layer.borderWidth = 0.5
-        textField.layer.cornerRadius = 10
-        return textField
+    let titleTextView: UITextView = {
+        let textView = UITextView()
+        textView.isEditable = false
+        textView.font = .systemFont(ofSize: 20, weight: .bold)
+        textView.textAlignment = .left
+        textView.textColor = .label
+        textView.backgroundColor = .systemBackground
+        textView.layer.borderColor = UIColor.label.cgColor
+        textView.layer.borderWidth = 0.5
+        textView.layer.cornerRadius = 10
+        return textView
     }()
     
     let datePicker: UIDatePicker = {
@@ -35,7 +36,7 @@ final class DetailView: UIView {
     let contentTextView: UITextView = {
         let textView = UITextView()
         textView.isEditable = false
-        textView.font = .systemFont(ofSize: 20)
+        textView.font = .systemFont(ofSize: 18)
         textView.textAlignment = .left
         textView.textColor = .label
         textView.backgroundColor = .systemBackground
@@ -60,21 +61,21 @@ final class DetailView: UIView {
 extension DetailView {
     private func layout() {
         [
-            titleTextField,
+            titleTextView,
             datePicker,
             contentTextView
         ].forEach {
             addSubview($0)
         }
         
-        titleTextField.snp.makeConstraints {
+        titleTextView.snp.makeConstraints {
             $0.top.leading.equalTo(self.safeAreaLayoutGuide).offset(8)
             $0.trailing.equalTo(self.safeAreaLayoutGuide).offset(-8)
-            $0.height.equalTo(50)
+            $0.height.equalTo(40)
         }
         
         datePicker.snp.makeConstraints {
-            $0.top.equalTo(titleTextField.snp.bottom).offset(8)
+            $0.top.equalTo(titleTextView.snp.bottom).offset(8)
             $0.leading.equalTo(self.safeAreaLayoutGuide).offset(8)
             $0.trailing.equalTo(self.safeAreaLayoutGuide).offset(-8)
             $0.height.equalTo(30)

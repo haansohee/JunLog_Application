@@ -31,6 +31,12 @@ final class MainTableViewController: UITableViewController {
         configureBarButtonItem()
         setupView()
         
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.getData()
+        
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
@@ -76,13 +82,12 @@ extension MainTableViewController {
 }
 
 extension MainTableViewController {
-    //MARK: DataSource
+    //MARK: TalbeView DataSource
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(viewModel.logWriteData.count)
         return viewModel.logWriteData.count
     }
     
@@ -95,7 +100,7 @@ extension MainTableViewController {
         return cell
     }
     
-    //MARK: Delegate
+    //MARK: TalbeView Delegate
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let data = viewModel.logWriteData[indexPath.row]
         let viewController = DetailViewController(data: data)
@@ -108,5 +113,9 @@ extension MainTableViewController {
             viewModel.deleteData(indexPath: indexPath)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        return "삭제"
     }
 }

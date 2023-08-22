@@ -13,27 +13,27 @@ final class DetailViewModel {
     private let realm = try! Realm()
     private let dateFormatter = DateFormatter()
     
-    func uploadLog(title: String, content: String, date: Date) {
-        if title.isEmpty {
+    func uploadLog(with junLogContent: JunLogContent) {
+        if junLogContent.title.isEmpty || (junLogContent.title == junLogContent.titlePlaceholder){
             logWirteData.title = "제목없음"
         } else {
-            logWirteData.title = title
+            logWirteData.title = junLogContent.title
         }
         
-        if content.isEmpty {
+        if junLogContent.content.isEmpty || (junLogContent.content == junLogContent.contentPlaceholder) {
             logWirteData.content = "내용없음"
         } else {
-            logWirteData.content = content
+            logWirteData.content = junLogContent.content
         }
         
         dateFormatter.dateFormat = "yyyy/MM/dd"
-        let date = dateFormatter.string(from: date)
+        let date = dateFormatter.string(from: junLogContent.writeDate)
         
         // make ID
         dateFormatter.dateFormat = "yyyyMMddHHmmss"
         dateFormatter.locale = Locale(identifier: "ko_KR")
         
-        guard let id = Int(dateFormatter.string(from: Date())) else { return print("id ERror")}
+        guard let id = Int(dateFormatter.string(from: Date())) else { return print("id ERror") }
         
         logWirteData.date = date
         logWirteData.id = id

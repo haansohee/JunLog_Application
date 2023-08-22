@@ -20,6 +20,10 @@ final class DetailViewController: UIViewController {
     private let detailView = DetailView()
     private var viewType: ViewType
     private let viewModel: DetailViewModel
+    private let logContent: JunLogContent
+    
+    private let titlePlaceholder = "제목을 입력하세요. (15자 이내)"
+    private let contentPlaceholder = "내용을 입력하세요. (300자 이내)"
     
     init(data: LogWriteData? = nil) {
         self.viewModel = DetailViewModel()
@@ -37,6 +41,8 @@ final class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        detailView.titleTextView.delegate = self
+        detailView.contentTextView.delegate = self
         setupDetailView()
         configureBarButtonItem()
     }
@@ -56,17 +62,22 @@ extension DetailViewController {
     private func configureDetailView(data: LogWriteData? = nil) {
         switch viewType {
         case .read:
-            guard let data = data else { return } // data가 있는 경우에만
-            detailView.titleTextField.text = data.title
+            guard let data = data else { return }
+            detailView.titleTextView.text = data.title
+            detailView.titleTextView.textColor = .label
             detailView.contentTextView.text = data.content
+            detailView.contentTextView.textColor = .label
             
         case .write:
             detailView.datePicker.isEnabled = true
+            
+            detailView.titleTextView.isEditable = true
+            detailView.titleTextView.text = titlePlaceholder
+            detailView.titleTextView.textColor = .placeholderText
+            
             detailView.contentTextView.isEditable = true
-            detailView.titleTextField.isEnabled = true
-            detailView.titleTextField.text = ""
-            detailView.titleTextField.placeholder = "제목을 입력해 주세요"
-            detailView.contentTextView.text = ""
+            detailView.contentTextView.text = contentPlaceholder
+            detailView.contentTextView.textColor = .placeholderText
         }
     }
     
@@ -76,18 +87,98 @@ extension DetailViewController {
         navigationItem.rightBarButtonItem = updateButton
     }
     
+    private func configurePlaceholder(with textView: UITextView, isEmpty: Bool) {
+        guard isEmpty else {
+            textView.text = ""
+            textView.textColor = .label
+            return
+        }
+        
+        if textView == detailView.titleTextView {
+            textView.text = self.titlePlaceholder
+        } else {
+            textView.text = self.contentPlaceholder
+        }
+        
+        textView.textColor = .placeholderText
+    }
+    
     @objc private func updateButtonTapped(_ sender: UIBarButtonItem) {
         switch self.viewType {
         case .read:
             print("read")
             
         case .write:
-            guard let title = detailView.titleTextField.text else { return }
+            guard let title = detailView.titleTextView.text else { return }
             guard let content = detailView.contentTextView.text else { return }
             
-            viewModel.uploadLog(title: title, content: content, date: detailView.datePicker.date)
             
-            self.navigationController?.popViewController(animated: true)
+            let alert = UIAlertController(title: "쭌로그", message: "업로드 할까요?", preferredStyle: .alert)
+            
+            let confirmAlert = UIAlertAction(title: "업로드 하기", style: .default) { [weak self] _ in
+                guard let date = self?.detailView.datePicker.date,
+                      let titlePlaceholder = self?.titlePlaceholder,
+                      let contentPlaceholder = self?.contentPlaceholder else { return }
+                
+                let junLogContent = JunLogContent(
+                    title: title,
+                    content: content,
+                    writeDate: date,
+                    updatedDate: Date(),
+                    titlePlaceholder: titlePlaceholder,
+                    contentPlaceholder: contentPlaceholder
+                )
+                
+                self?.viewModel.uploadLog(with: junLogContent)
+                
+                self?.navigationController?.popViewController(animated: true)
+            }
+            
+            let cancelAlert = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            
+            alert.addAction(confirmAlert)
+            alert.addAction(cancelAlert)
+            
+            present(alert, animated: true, completion: nil)
+        }
+    }
+}
+
+//MARK: TextView Delegate
+extension DetailViewController: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        guard textView.textColor == .placeholderText else { return }
+        configurePlaceholder(with: textView, isEmpty: false)
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        guard textView.text.isEmpty else { return }
+        configurePlaceholder(with: textView, isEmpty: true)
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        if textView.text.isEmpty {
+            configurePlaceholder(with: textView, isEmpty: true)
+        } else if textView.textColor == .placeholderText {
+            configurePlaceholder(with: textView, isEmpty: false)
+        }
+        
+        let titleMaxLength = 15
+        let contentMaxLength = 300
+        
+        switch textView {
+        case detailView.titleTextView:
+            if textView.text.count > titleMaxLength {
+                textView.text = String(textView.text.prefix(titleMaxLength))
+            }
+            
+        case detailView.contentTextView:
+            if textView.text.count > contentMaxLength {
+                textView.text = String(textView.text.prefix(contentMaxLength))
+            }
+            
+        default:
+            print("ERROR:")
         }
     }
 }
