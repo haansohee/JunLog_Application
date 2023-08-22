@@ -21,8 +21,8 @@ final class DetailViewController: UIViewController {
     private var viewType: ViewType
     private let viewModel: DetailViewModel
     
-    private let titleLengthLimit = "제목을 입력하세요. (15자 이내)" 
-    private let contentLengthLimit = "내용을 입력하세요. (300자 이내)"
+    private let titlePlaceholder = "제목을 입력하세요. (15자 이내)"
+    private let contentPlaceholder = "내용을 입력하세요. (300자 이내)"
     
     init(data: LogWriteData? = nil) {
         self.viewModel = DetailViewModel()
@@ -61,7 +61,7 @@ extension DetailViewController {
     private func configureDetailView(data: LogWriteData? = nil) {
         switch viewType {
         case .read:
-            guard let data = data else { return } // data가 있는 경우에만
+            guard let data = data else { return }
             detailView.titleTextView.text = data.title
             detailView.titleTextView.textColor = .label
             detailView.contentTextView.text = data.content
@@ -70,13 +70,13 @@ extension DetailViewController {
         case .write:
             detailView.datePicker.isEnabled = true
             
-            detailView.contentTextView.isEditable = true
-            detailView.contentTextView.text = contentLengthLimit
-            detailView.contentTextView.textColor = .placeholderText
-            
             detailView.titleTextView.isEditable = true
-            detailView.titleTextView.text = titleLengthLimit
+            detailView.titleTextView.text = titlePlaceholder
             detailView.titleTextView.textColor = .placeholderText
+            
+            detailView.contentTextView.isEditable = true
+            detailView.contentTextView.text = contentPlaceholder
+            detailView.contentTextView.textColor = .placeholderText
         }
     }
     
@@ -84,6 +84,22 @@ extension DetailViewController {
         let title = self.viewType == .read ? "수정하기" : "등록하기"
         self.updateButton = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector (updateButtonTapped(_:)))
         navigationItem.rightBarButtonItem = updateButton
+    }
+    
+    private func configurePlaceholder(with textView: UITextView, isEmpty: Bool) {
+        guard isEmpty else {
+            textView.text = ""
+            textView.textColor = .label
+            return
+        }
+        
+        if textView == detailView.titleTextView {
+            textView.text = self.titlePlaceholder
+        } else {
+            textView.text = self.contentPlaceholder
+        }
+        
+        textView.textColor = .placeholderText
     }
     
     @objc private func updateButtonTapped(_ sender: UIBarButtonItem) {
@@ -100,15 +116,15 @@ extension DetailViewController {
             
             let confirmAlert = UIAlertAction(title: "업로드 하기", style: .default) { [weak self] _ in
                 guard let date = self?.detailView.datePicker.date,
-                      let titleLengthLimit = self?.titleLengthLimit,
-                      let contentLengthLimit = self?.contentLengthLimit else { return }
+                      let titlePlaceholder = self?.titlePlaceholder,
+                      let contentPlaceholder = self?.contentPlaceholder else { return }
                 
                 self?.viewModel.uploadLog(
                     title: title,
                     content: content,
                     date: date,
-                    titleLengthLimit: titleLengthLimit,
-                    contentLengthLimit: contentLengthLimit
+                    titlePlaceholder: titlePlaceholder,
+                    contentPlaceholder: contentPlaceholder
                 )
                 self?.navigationController?.popViewController(animated: true)
             }
@@ -125,61 +141,22 @@ extension DetailViewController {
 
 //MARK: TextView Delegate
 extension DetailViewController: UITextViewDelegate {
-
-    func textViewDidChange(_ textView: UITextView) {
-        let titleMaxLength = 15
-        let contentMaxLength = 300
-        
-        switch textView {
-        case detailView.titleTextView:
-            if textView.text.count > titleMaxLength {
-                textView.text = String(textView.text.prefix(titleMaxLength))
-            }
-            
-        case detailView.contentTextView:
-            if textView.text.count > contentMaxLength {
-                textView.text = String(textView.text.prefix(contentMaxLength))
-            }
-            
-        default:
-            print("error")
-        }
-    }
-    
     func textViewDidBeginEditing(_ textView: UITextView) {
-        switch textView {
-        case detailView.titleTextView:
-            if detailView.titleTextView.textColor == .placeholderText {
-                detailView.titleTextView.textColor = .label
-                detailView.titleTextView.text = nil
-            }
-            
-        case detailView.contentTextView:
-            if detailView.contentTextView.textColor == .placeholderText {
-                detailView.contentTextView.textColor = .label
-                detailView.contentTextView.text = nil
-            }
-        default:
-            print("Error")
-        }
+        guard textView.textColor == .placeholderText else { return }
+        configurePlaceholder(with: textView, isEmpty: false)
+        
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-        switch textView {
-        case detailView.titleTextView:
-            if detailView.titleTextView.text.isEmpty {
-                detailView.titleTextView.text = "제목을 입력하세요. (15자 이내)"
-                detailView.titleTextView.textColor = .placeholderText
-            }
-            
-        case detailView.contentTextView:
-            if detailView.contentTextView.text.isEmpty {
-                detailView.contentTextView.text = "내용을 입력하세요. (300자 이내)"
-                detailView.contentTextView.textColor = .placeholderText
-            }
-            
-        default:
-            print("Error")
+        guard textView.text.isEmpty else { return }
+        configurePlaceholder(with: textView, isEmpty: true)
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        if textView.text.isEmpty {
+            configurePlaceholder(with: textView, isEmpty: true)
+        } else if textView.textColor == .placeholderText {
+            configurePlaceholder(with: textView, isEmpty: false)
         }
     }
 }
