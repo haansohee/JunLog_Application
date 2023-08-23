@@ -170,7 +170,6 @@ extension DetailViewController {
         alert.addAction(cancelAlert)
 
         present(alert, animated: true, completion: nil)
-
     }
 }
 
