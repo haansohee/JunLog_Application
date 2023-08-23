@@ -9,7 +9,7 @@ import Foundation
 import RealmSwift
 
 final class DetailViewModel {
-    private var logWirteData = LogWriteData()
+    private var logWriteData = LogWriteData()
     private let realm = try! Realm()
     private let dateFormatter = DateFormatter()
     
@@ -20,40 +20,51 @@ final class DetailViewModel {
         return date
     }
     
-    func converDateToString(date: Date) -> String {
+    private func convertDateToString(date: Date) -> String {
         dateFormatter.dateFormat = "yyyy/MM/dd"
         return dateFormatter.string(from: date)
     }
     
-    func uploadLog(with junLogContent: JunLogContent) {
+    private func test(junLogContent: JunLogContent) {
         if junLogContent.title.isEmpty || (junLogContent.title == junLogContent.titlePlaceholder){
-            logWirteData.title = "제목없음"
+            logWriteData.title = "제목없음"
         } else {
-            logWirteData.title = junLogContent.title
+            logWriteData.title = junLogContent.title
         }
         
         if junLogContent.content.isEmpty || (junLogContent.content == junLogContent.contentPlaceholder) {
-            logWirteData.content = "내용없음"
+            logWriteData.content = "내용없음"
         } else {
-            logWirteData.content = junLogContent.content
+            logWriteData.content = junLogContent.content
         }
         
-        let date = converDateToString(date: junLogContent.date)
+        let date = convertDateToString(date: junLogContent.date)
+        logWriteData.date = date
+    }
+    
+    func uploadLog(with junLogContent: JunLogContent) {
+        test(junLogContent: junLogContent)
         
         // make ID
         dateFormatter.dateFormat = "yyyyMMddHHmmss"
         dateFormatter.locale = Locale(identifier: "ko_KR")
-        
-        guard let id = Int(dateFormatter.string(from: Date())) else { return print("id ERror") }
-        
-        logWirteData.date = date
-        logWirteData.id = id
+        guard let id = Int(dateFormatter.string(from: Date())) else { return print("ID ERROR") }
+        logWriteData.id = id
         
         try! realm.write {
-            realm.add(logWirteData)
+            realm.add(logWriteData)
         }
     }
     
     func updateLog(with junLogContent: JunLogContent, id: Int) {
+        test(junLogContent: junLogContent)
+        
+        if let object = realm.objects(LogWriteData.self).filter("id = \(id)").first {
+            try! realm.write {
+                object.title = logWriteData.title
+                object.content = logWriteData.content
+                object.date = logWriteData.date
+            }
+        }
     }
 }
