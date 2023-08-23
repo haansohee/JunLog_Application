@@ -10,8 +10,7 @@ import Foundation
 struct JunLogContent {
     let title: String
     let content: String
-    let writeDate: Date
-    let updatedDate: Date?
+    let date: Date
     let titlePlaceholder: String
     let contentPlaceholder: String
 }
