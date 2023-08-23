@@ -18,7 +18,6 @@ final class MainTableViewController: UITableViewController {
     init() {
         self.viewModel = MainTableViewModel()
         super.init(nibName: nil, bundle: nil)
-        viewModel.getData()
     }
     
     required init?(coder: NSCoder) {
@@ -69,7 +68,31 @@ extension MainTableViewController {
     @objc private func didSelectBarButton(_ sender: UIBarButtonItem) {
         switch sender.tag {
         case 1:
-            print("날짜 정렬")
+            
+            let actionSheet = UIAlertController(title: "날짜 정렬하기", message: "날짜 정렬을 할까요?", preferredStyle: .actionSheet)
+            
+            let descSort = UIAlertAction(title: "과거순", style: .default) { [weak self] _ in
+                self?.viewModel.getData(sortSet: true, asc: false)
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            }
+            
+            let ascSort = UIAlertAction(title: "최신순", style: .default) { [weak self] _ in
+                self?.viewModel.getData(sortSet: true, asc: true)
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            }
+            
+            let cancel = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            
+            actionSheet.addAction(descSort)
+            actionSheet.addAction(ascSort)
+            actionSheet.addAction(cancel)
+            
+            present(actionSheet, animated: true)
+
             
         case 2:
             let viewController = DetailViewController()
